@@ -1,0 +1,124 @@
+label: 'Ugaritic Alphabet'
+credits: 'bencrowder.net {u2014} Last modified {date}'
+
+output: 'ugaritic-alphabet.pdf'
+
+page:
+  width: 792
+  height: 612
+  margin: 40
+
+divider:
+  start:
+    y: -25
+  end:
+    y: 460
+
+col:
+  width: 188
+  offset:
+    y: 63
+  start:
+    x: 40
+    y: 110
+  line:
+    offset:
+      x: 17
+  letters: 8
+
+fonts:
+  header:
+    family: Charis SIL
+    size: 16
+    tracking: -15
+  letter:
+    family: Abydos
+    size: 36
+    fill: "#444"
+    tracking: 0
+    weight: regular
+    italic: false
+    sc: false
+    offset:
+      x: 22
+      y: 0
+  transcription:
+    family: Charis SIL
+    fill: "#cb202c"
+    size: 20
+    sub:
+      size: 9
+    tracking: 0
+    offset:
+      x: 55
+      y: -5
+    divider:
+      size: 14
+      fill: "#666"
+  hebrew:
+    family: Linux Libertine O
+    fill: "#444"
+    size: 12
+    tracking: 0
+    label:
+      family: Charis SIL
+      fill: "#aaa"
+      size: 6
+      tracking: 30
+      offset:
+        x: 0
+        y: -12
+    offset:
+      x: 30
+      y: 1
+    gap_offset:
+      x: 10
+  arabic:
+    family: Charis SIL
+    fill: "#444"
+    size: 12
+    tracking: 0
+    label:
+      family: Charis SIL
+      fill: "#aaa"
+      size: 6
+      tracking: 30
+      offset:
+        x: 0
+        y: -12
+    offset:
+      x: 30
+      y: 1
+
+letters:
+  - { letter: '{u10380}', transcription: '{u02be}a', hebrew: '{u05d0}', arabic: '{u0623}', offset: { 'y': -2 } }
+  - { letter: '{u10381}', transcription: 'b', hebrew: '{u05d1}', arabic: '{u0628}', offset: { 'y': 4 } }
+  - { letter: '{u10382}', transcription: 'g', hebrew: '{u05d2}', arabic: '{u062c}', offset: { 'y': 2 } }
+  - { letter: '{u10383}', transcription: '{u1e2b}', arabic: '{u062e}' }
+  - { letter: '{u10384}', transcription: 'd', hebrew: '{u05d3}', arabic: '{u062f}', offset: { 'y': 4 } }
+  - { letter: '{u10385}', transcription: 'h', hebrew: '{u05d4}', arabic: '{u0647}' }
+  - { letter: '{u10386}', transcription: 'w', hebrew: '{u05d5}', arabic: '{u0648}', offset: { 'y': 4 } }
+  - { letter: '{u10387}', transcription: 'z', hebrew: '{u05d6}', arabic: '{u0632}', offset: { 'y': 1 } }
+  - { letter: '{u10388}', transcription: '{u1e25}', hebrew: '{u05d7}', arabic: '{u062d}' }
+  - { letter: '{u10389}', transcription: '{u1e6d}', hebrew: '{u05d8}', arabic: '{u0637}', offset: { 'y': 1 } }
+  - { letter: '{u1038a}', transcription: 'y', hebrew: '{u05d9}', arabic: '{u064a}', offset: { 'y': 2 } }
+  - { letter: '{u1038b}', transcription: 'k', hebrew: '{u05db}', arabic: '{u0643}', offset: { 'y': 4 } }
+  - { letter: '{u1038c}', transcription: '{u0161}', hebrew: '{u05e9}', arabic: '{u0634}' }
+  - { letter: '{u1038d}', transcription: 'l', hebrew: '{u05dc}', arabic: '{u0644}' }
+  - { letter: '{u1038e}', transcription: 'm', hebrew: '{u05de}', arabic: '{u0645}' }
+  - { letter: '{u1038f}', transcription: '{u1e0f}', arabic: '{u0630}' }
+  - { letter: '{u10390}', transcription: 'n', hebrew: '{u05e0}', arabic: '{u0646}', offset: { 'y': -2 } }
+  - { letter: '{u10391}', transcription: '{u1e93}', arabic: '{u0638}', offset: { 'y': 2 } }
+  - { letter: '{u10392}', transcription: 's', hebrew: '{u05e1}', arabic: '{u0633}' }
+  - { letter: '{u10393}', transcription: '{u02bf}', hebrew: '{u05e2}', arabic: '{u0639}' }
+  - { letter: '{u10394}', transcription: 'p', hebrew: '{u05e4}', arabic: '{u0641}', offset: { 'y': 2 } }
+  - { letter: '{u10395}', transcription: '{u1e63}', hebrew: '{u05e6}', arabic: '{u0635}', offset: { 'y': 2 } }
+  - { letter: '{u10396}', transcription: 'q', hebrew: '{u05e7}', arabic: '{u0642}', offset: { 'y': 2 } }
+  - { letter: '{u10397}', transcription: 'r', hebrew: '{u05e8}', arabic: '{u0631}', offset: { 'y': 5 } }
+  - { letter: '{u10398}', transcription: '{u1e6f}', arabic: '{u062b}', offset: { 'y': 1 } }
+  - { letter: '{u10399}', transcription: '{u0121}', arabic: '{u063a}', offset: { 'y': -1 } }
+  - { letter: '{u1039a}', transcription: 't', hebrew: '{u05ea}', arabic: '{u062a}' }
+  - { letter: '{u1039b}', transcription: '{u02be}i', arabic: '{u0626}', offset: { 'y': -4 } }
+  - { letter: '{u1039c}', transcription: '{u02be}u', arabic: '{u0624}', offset: { 'y': 4 } }
+  - { letter: '{u1039d}', transcription: 's<sub>2</sub>', offset: { 'y': 2 } }
+  - { letter: '{u1039f}', transcription: 'word divider', offset: { 'y': 2 } }

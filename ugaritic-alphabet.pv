@@ -1,0 +1,378 @@
+# Ugaritic alphabet chart
+# by Ben Crowder, bencrowder.net
+
+# Uses PlotDevice (plotdevice.io)
+
+from __future__ import unicode_literals
+
+from datetime import datetime
+import re
+import yaml
+
+
+class Chart:
+    """
+    Base chart class.
+    """
+
+    def __init__(self, filename=None):
+        """
+        Loads data if given.
+        """
+        if filename:
+            self.load_data(filename)
+
+    def load_data(self, filename='data.yaml'):
+        """
+        Loads data from YAML. Returns data dictionary.
+        """
+        try:
+            with open(filename, 'r') as f:
+                data = f.read()
+
+            self.data = yaml.load(data)
+        except Exception as e:
+            print('Error loading YAML: ', e)
+
+            return None
+
+    def md(self, selector):
+        """
+        Returns data from metadata dictionary. For example:
+
+        md('fonts.header.family')
+        
+        returns
+
+        data['fonts']['header']['family']
+        """
+        keys = selector.split('.')
+        m = dict(self.data)
+
+        for k in keys:
+            if k in m:
+                m = m[k]
+            else:
+                return None
+
+        return m
+
+    def chunks(self, l, n):
+        """
+        Yield successive n-sized chunks from l.
+        """
+        for i in xrange(0, len(l), n):
+            yield l[i:i+n]
+
+    def parse_text(self, text):
+        """
+        Replaces {u2014} type placeholders with the actual characters.
+        Also replaces {date} placeholder.
+        """
+        def u_repl(matchobj):
+            """
+            Converts a unicode hex string to the actual character.
+            """
+            response = u''.join(['\\', 'U', matchobj.group(1).zfill(8)])
+            return response.decode('unicode-escape')
+
+        # Replace the {date} placeholder
+        if '{date}' in text:
+            text = text.replace(
+                '{date}',
+                datetime.strftime(datetime.now(), '%-d %B %Y'),
+            )
+
+        # Replace Unicode placeholders
+        text = re.sub(r'{u(.+)}', u_repl, text)
+
+        return text
+
+    def draw_chart_title(self):
+        """
+        Draws the chart title at the top left of the header.
+        """
+        font(
+            self.md('fonts.header.family'),
+            size=self.md('fonts.header.size'),
+            tracking=self.md('fonts.header.tracking'),
+        )
+
+        text(
+            self.data['label'],
+            x=self.md('page.margin'),
+            y=self.md('page.margin') + 10
+        )
+
+    def draw_chart_credits(self):
+        """
+        Draws the chart credits at the top right of the header.
+        """
+        align(RIGHT)
+        stroke(0)
+        fill(0.5)
+        font(size=9, italic=True, tracking=0, sc=False)
+
+        text(
+            self.parse_text(self.md('credits')),
+            x=self.md('page.width') - self.md('page.margin'),
+            y=self.md('page.margin') + 10,
+        )
+
+        font(italic=False)
+        align(LEFT)
+
+    def draw_header(self):
+        """
+        Draw the header at the top.
+        """
+        push()
+
+        # Chart title
+        self.draw_chart_title()
+
+        # Chart credits
+        self.draw_chart_credits()
+
+        pop()
+
+
+class UgariticChart(Chart):
+    """
+    Ugaritic alphabet chart class.
+    """
+
+    def parse_list(self, letters):
+        """
+        Parses the YAML file into a list of dictionaries.
+        """
+        response = []
+        fields = [
+            'letter',
+            'transcription',
+            'hebrew',
+            'arabic',
+        ]
+
+        for line in letters:
+            data = line.split('|')
+
+            # Create a dictionary with the fields
+            group = {}
+            for i, field in enumerate(fields):
+                group[field] = data[i].strip()
+
+            response.append(group)
+
+        return response
+
+    def chunk_into_columns(self, letters):
+        """
+        Chunk the list of letters into columns.
+        """
+        return self.chunks(
+            letters,
+            self.md('col.letters'),
+        )
+
+    def draw_letter_glyph(self, letter):
+        """
+        Draws the glyph part of a letter group.
+        """
+        with translate(
+            self.md('fonts.letter.offset.x'),
+            self.md('fonts.letter.offset.y'),
+        ):
+            align(CENTER)
+            font(self.md('fonts.letter.family'),
+                size=self.md('fonts.letter.size'),
+                tracking=letter['tracking'] if 'tracking' in letter else 0,
+                weight=self.md('fonts.letter.weight'),
+                sc=self.md('fonts.letter.sc'),
+                italic=self.md('fonts.letter.italic'),
+            )
+            fill(0)
+
+            offset_x = 0
+            offset_y = 0
+
+            if 'offset' in letter:
+                if 'x' in letter['offset']:
+                    offset_x = letter['offset']['x']
+
+                if 'y' in letter['offset']:
+                    offset_y = letter['offset']['y']
+
+            text(
+                self.parse_text(letter['letter']),
+                offset_x,
+                offset_y,
+            )
+
+            align(LEFT)
+
+    def draw_letter_transcription(self, letter):
+        """
+        Draws the transcription part of a letter group.
+        """
+        translate(
+            self.md('fonts.transcription.offset.x'),
+            self.md('fonts.transcription.offset.y'),
+        )
+
+        if 'transcription' in letter and letter['transcription'] != '':
+            fill(self.md('fonts.transcription.fill'))
+
+            font(self.md('fonts.transcription.family'),
+                size=self.md('fonts.transcription.size'),
+                tracking=self.md('fonts.transcription.tracking'),
+            )
+
+            if letter['transcription'] == 'word divider':
+                font(
+                    size=self.md('fonts.transcription.divider.size'),
+                    italic=True,
+                )
+                fill(self.md('fonts.transcription.divider.fill'))
+
+            text(
+                0,
+                0,
+                xml=self.parse_text(letter['transcription']),
+            )
+
+    def draw_letter_other(self, letter, language):
+        """
+        Draws the Hebrew/Arabic part of a letter group.
+        """
+        if language in letter and letter[language] != '':
+            base = 'fonts.{lang}'.format(lang=language)
+
+            with translate(
+                self.md('{base}.offset.x'.format(base=base)),
+                self.md('{base}.offset.y'.format(base=base)),
+            ):
+                if (
+                    language == 'arabic'
+                    and 'hebrew' in letter
+                    and letter['hebrew'] != ''
+                ):
+                    # Add gap if we have both
+                    translate(
+                        self.md('fonts.hebrew.offset.x') +
+                            self.md('fonts.hebrew.gap_offset.x'),
+                        0,
+                    )
+
+                fill(self.md('{base}.fill'.format(base=base)))
+                font(self.md('{base}.family'.format(base=base)),
+                    size=self.md('{base}.size'.format(base=base)),
+                    tracking=self.md('{base}.tracking'.format(base=base)),
+                )
+                text(
+                    self.parse_text(letter[language]),
+                    0,
+                    0,
+                )
+                with translate(
+                    self.md('{base}.label.offset.x'.format(base=base)),
+                    self.md('{base}.label.offset.y'.format(base=base)),
+                ):
+                    fill(self.md('{base}.label.fill'.format(base=base)))
+                    font(self.md('{base}.label.family'.format(base=base)),
+                        size=self.md('{base}.label.size'.format(base=base)),
+                        tracking=self.md(
+                            '{base}.label.tracking'.format(base=base)
+                        ),
+                        sc=True,
+                    )
+                    text(
+                        language,
+                        0,
+                        0,
+                    )
+                    font(sc=False)
+
+    def draw_letter_hebrew(self, letter):
+        """
+        Draws the Hebrew part of a letter group.
+        """
+        self.draw_letter_other(letter, 'hebrew')
+
+    def draw_letter_arabic(self, letter):
+        """
+        Draws the Arabic part of a letter group.
+        """
+        self.draw_letter_other(letter, 'arabic')
+
+    def draw_letter_group(self, letter):
+        """
+        Draws a letter for a given column.
+        """
+        self.draw_letter_glyph(letter)
+        self.draw_letter_transcription(letter)
+        self.draw_letter_hebrew(letter)
+        self.draw_letter_arabic(letter)
+
+    def draw_col_divider(self, col_num):
+        """
+        Draws a divider line left of the column if appropriate.
+        """
+        if col_num > 0:
+            pen(0.25)
+            stroke(0.5)
+            line(
+                -self.md('col.line.offset.x'),
+                self.md('divider.start.y'),
+                -self.md('col.line.offset.x'),
+                self.md('divider.end.y'),
+            )
+
+    def draw_column(self, letters, x, y, col_num):
+        """
+        Draw a column of letters.
+        """
+
+        with translate(x, y):
+            # Draw a divider line left of the column
+            self.draw_col_divider(col_num)
+
+            for letter in letters:
+                push()
+                self.draw_letter_group(letter)
+                pop()
+                translate(0, self.md('col.offset.y'))
+
+
+# Main body ------------------------------------------------------------------
+
+c = UgariticChart('data.yaml')
+
+# Set up the page
+size(c.md('page.width'), c.md('page.height'))
+background(1)
+
+# Set up styles
+stylesheet(
+    'sub',
+    size=c.md('fonts.transcription.sub.size'),
+    leading=50.0,
+)
+
+# Chunk the character list into columns 
+letter_list = c.chunk_into_columns(c.data['letters'])
+
+# Draw the header
+c.draw_header()
+
+# Draw each column
+for col_num, col_letters in enumerate(letter_list):
+    c.draw_column(
+        col_letters,
+        x=c.md('col.start.x') + (col_num * c.md('col.width')),
+        y=c.md('col.start.y'),
+        col_num=col_num,
+    )
+
+# Save to PDF (filename specified in the YAML file)
+export(c.data['output'])
